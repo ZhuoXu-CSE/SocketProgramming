@@ -11,11 +11,36 @@ else:
     exit(1)
 
 
-def upload(conection):
+def upload(connection):
+    filename = connection.recv(BUF_SIZE)
+    if filename:
+        filepath = "/Users/zx/Desktop/CSE3461Lab/Receive/" + Filename.decode()
+        file = open(filepath, "wb")
+        recvdata = connection.recv(BUF_SIZE)
+        while recvdata:
+            file.write(recvdata)
+            recvdata = connection.recv(BUF_SIZE)
+        file.close()
+    print("\n File has been Transferred successfully \n")
+
+
+def retrieve(connection):
     pass
 
 
-commands = ["Upload", "Retrieve", "Signin", "Signout" "Logging", "List"]
+def signin(connection):
+    pass
+
+
+def signout(connection):
+    pass
+
+
+def logging(connection):
+    pass
+
+
+commands = ["Upload", "Retrieve", "Signin", "Signout" "Logging"]
 s = socket.socket()
 s.bind(('', int(PORT)))
 s.listen()
@@ -24,24 +49,26 @@ while True:
     msg = "\nHi Client[IP address: " + addr[0] + "], \n ֲֳ**Welcome** \n -Server\n"
     conn.send(msg.encode())
     Comm = conn.recv(BUF_SIZE)
-    args = Comm.decode().split()
-    while args[0] not in commands:
-        msg = "Invalid command: " + args[0] + "\n\nCommands:\n  Upload\n  Retrieve\n  Signin\n  Signout\n  Logging" \
-                                              "\n  List\n "
-        conn.send(msg.encode())
-        Comm = conn.recv(BUF_SIZE)
+    while Comm:
         args = Comm.decode().split()
-    # Receive filename from client side
-    Filename = conn.recv(BUF_SIZE)
-    if Filename:
-        filepath = "/Users/zx/Desktop/CSE3461Lab/Receive/" + Filename.decode()
-        File = open(filepath, "wb")
-        RecvData = conn.recv(BUF_SIZE)
-        while RecvData:
-            File.write(RecvData)
-            RecvData = conn.recv(BUF_SIZE)
-    File.close()
-    print("\n File has been Transferred successfully \n")
+        while args[0] not in commands:
+            msg = "Invalid command: " + args[0] + "\n\nCommands:\n  Upload\n  Retrieve\n  Signin\n  Signout\n  Logging" \
+                                                  "\n  List\n "
+            conn.send(msg.encode())
+            Comm = conn.recv(BUF_SIZE)
+            args = Comm.decode().split()
+        # Receive filename from client side
+        if args[0] == "Upload":
+            upload(conn)
+        elif args[0] == "Retrieve":
+            retrieve(conn)
+        elif args[0] == "Signin":
+            signin(conn)
+        elif args[0] == "Signout":
+            signout(conn)
+        elif args[0] == "Logging":
+            logging(conn)
+    Comm = conn.recv(BUF_SIZE)
     conn.close()
     print("\n Server closed the connection \n")
 

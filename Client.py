@@ -14,7 +14,7 @@ s.connect((ServerIp, int(ServerPort)))
 print(s.recv(BUF_SIZE).decode())
 while True:
     while True:
-        Command = input("\nPlease enter command:\n Upload, Retrieve, Sign in, Sign out Logging, List\nCommand:")
+        Command = input("\nPlease enter command:\n Upload, Retrieve, Sign in, Sign out Logging\nCommand:")
         s.send(Command.encode())
         Data = s.recv(BUF_SIZE)
         print(Data.decode())
