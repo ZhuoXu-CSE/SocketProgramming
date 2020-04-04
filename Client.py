@@ -8,25 +8,59 @@ if len(sys.argv) == 3:
 else:
     print("\n  Run the program like:\n python3 Client.py < serverip address > <Port number>\n")
     exit(1)
-commands = ["Upload", "Retrieve", "Sign in", "Sign out" "Logging", "List"]
+
+
+def upload(soc):
+    filename = input("\nPlease enter file name:\n")
+    soc.send(filename.encode())
+    filename = "/Users/zx/Desktop/CSE3461Lab/Test/" + filename
+    file = open(filename, "rb")
+    SendData = file.read(BUF_SIZE)
+    while SendData:
+        soc.send(SendData)
+        SendData = file.read(BUF_SIZE)
+    file.close()
+
+
+def retrieve(soc):
+    pass
+
+
+def signin(soc):
+    pass
+
+
+def signout(soc):
+    pass
+
+
+def logging(soc):
+    pass
+
+commands = ["Upload", "Retrieve", "Sign in", "Sign out" "Logging", "Quit"]
 s = socket.socket()
 s.connect((ServerIp, int(ServerPort)))
 print(s.recv(BUF_SIZE).decode())
 while True:
-    while True:
-        Command = input("\nPlease enter command:\n Upload, Retrieve, Sign in, Sign out Logging\nCommand:")
-        s.send(Command.encode())
+    Command = input("\nPlease enter command:\n Upload, Retrieve, Sign in, Sign out Logging\nCommand:")
+    s.send(Command.encode())
+    while Command:
+        if Command in commands:
+            break
         Data = s.recv(BUF_SIZE)
         print(Data.decode())
-        if not Data:
-            break
-    Filename = input("\nPlease enter file name:\n")
-    s.send(Filename.encode())
-    Filename = "/Users/zx/Desktop/CSE3461Lab/Test/" + Filename
-    file = open(Filename, "rb")
-    SendData = file.read(BUF_SIZE)
-    while SendData:
-        s.send(SendData)
-        SendData = file.read(BUF_SIZE)
-    file.close()
-    s.close()
+        Command = input("\nPlease enter command:\n Upload, Retrieve, Sign in, Sign out Logging\nCommand:")
+        s.send(Command.encode())
+    if Command == "Upload":
+        upload(s)
+    elif Command == "Retrieve":
+        retrieve(s)
+    elif Command == "Signin":
+        signin(s)
+    elif Command == "Signout":
+        signout(s)
+    elif Command == "Logging":
+        logging(s)
+    elif Command == "Quit":
+        break
+s.close()

@@ -12,9 +12,10 @@ else:
 
 
 def upload(connection):
+    # Receive filename from client side
     filename = connection.recv(BUF_SIZE)
     if filename:
-        filepath = "/Users/zx/Desktop/CSE3461Lab/Receive/" + Filename.decode()
+        filepath = "/Users/zx/Desktop/CSE3461Lab/Receive/" + filename.decode()
         file = open(filepath, "wb")
         recvdata = connection.recv(BUF_SIZE)
         while recvdata:
@@ -51,13 +52,19 @@ while True:
     Comm = conn.recv(BUF_SIZE)
     while Comm:
         args = Comm.decode().split()
-        while args[0] not in commands:
-            msg = "Invalid command: " + args[0] + "\n\nCommands:\n  Upload\n  Retrieve\n  Signin\n  Signout\n  Logging" \
-                                                  "\n  List\n "
-            conn.send(msg.encode())
-            Comm = conn.recv(BUF_SIZE)
-            args = Comm.decode().split()
-        # Receive filename from client side
+        while args[0] not in commands or len(args) > 1:
+            if args[0] not in commands:
+                msg = "Invalid command: " + args[0] + "\n\nCommands:\n  Upload\n  Retrieve\n  Signin\n  Signout\n  Logging" \
+                                                      "\n  List\n "
+                conn.send(msg.encode())
+                Comm = conn.recv(BUF_SIZE)
+                args = Comm.decode().split()
+            if len(args) > 1:
+                msg = "Excessive Parameters: " + str(args) + "\n\nCommands:" + args[0]
+                conn.send(msg.encode())
+                Comm = conn.recv(BUF_SIZE)
+                args = Comm.decode().split()
+
         if args[0] == "Upload":
             upload(conn)
         elif args[0] == "Retrieve":
@@ -68,7 +75,7 @@ while True:
             signout(conn)
         elif args[0] == "Logging":
             logging(conn)
-    Comm = conn.recv(BUF_SIZE)
+        Comm = conn.recv(BUF_SIZE)
     conn.close()
     print("\n Server closed the connection \n")
 
