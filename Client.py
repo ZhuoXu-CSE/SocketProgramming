@@ -23,44 +23,47 @@ def upload(soc):
 
 
 def retrieve(soc):
-    pass
-
-
-def signin(soc):
-    pass
-
-
-def signout(soc):
-    pass
+    filename = input("\nPlease enter file name you want to retrieve:\n")
+    soc.send(filename.encode())
+    if filename:
+        filepath = "/Users/zx/Desktop/CSE3461Lab/Test/" + filename
+        file = open(filepath, "wb")
+        recvdata = soc.recv(BUF_SIZE)
+        msg = recvdata.decode()
+        while recvdata and msg is not "File not found":
+            file.write(recvdata)
+            recvdata = soc.recv(BUF_SIZE)
+        file.close()
+    print("\n File has been Transferred successfully \n")
 
 
 def logging(soc):
     pass
 
-commands = ["Upload", "Retrieve", "Sign in", "Sign out" "Logging", "Quit"]
+
+commands = ["Upload", "Retrieve", "Signin", "Logging", "Quit"]
 s = socket.socket()
 s.connect((ServerIp, int(ServerPort)))
 print(s.recv(BUF_SIZE).decode())
+datatran = socket.socket()
+datatran.connect((ServerIp, int(ServerPort)+1))
 while True:
-    Command = input("\nPlease enter command:\n Upload, Retrieve, Sign in, Sign out Logging\nCommand:")
+    Command = input("\nPlease enter command:\n Upload, Retrieve, Signin, Logging Quit\nCommand:")
     s.send(Command.encode())
     while Command:
         if Command in commands:
             break
         Data = s.recv(BUF_SIZE)
         print(Data.decode())
-        Command = input("\nPlease enter command:\n Upload, Retrieve, Sign in, Sign out Logging\nCommand:")
+        Command = input("\nPlease enter command:\n Upload, Retrieve, Signin, Logging\nCommand:")
         s.send(Command.encode())
     if Command == "Upload":
-        upload(s)
+        upload(datatran)
     elif Command == "Retrieve":
-        retrieve(s)
-    elif Command == "Signin":
-        signin(s)
-    elif Command == "Signout":
-        signout(s)
+        retrieve(datatran)
     elif Command == "Logging":
         logging(s)
     elif Command == "Quit":
         break
 s.close()
+datatran.close()

@@ -26,36 +26,42 @@ def upload(connection):
 
 
 def retrieve(connection):
-    pass
-
-
-def signin(connection):
-    pass
-
-
-def signout(connection):
-    pass
+    filename = connection.recv(BUF_SIZE)
+    filepath = "/Users/zx/Desktop/CSE3461Lab/Receive/"+ filename.decode()
+    try:
+        with open(filepath, 'rb') as file:
+            SendData = file.read(BUF_SIZE)
+            while SendData:
+                connection.send(SendData)
+                SendData = file.read(BUF_SIZE)
+    except IOError:
+        msg = "File not found"
+        connection.send(msg.encode())
 
 
 def logging(connection):
     pass
 
 
-commands = ["Upload", "Retrieve", "Signin", "Signout" "Logging"]
+commands = ["Upload", "Retrieve", "Signin", "Logging", "Quit"]
 s = socket.socket()
 s.bind(('', int(PORT)))
 s.listen()
+datatran = socket.socket()
+datatran.bind(('', int(PORT)+1))
+datatran.listen()
 while True:
     conn, addr = s.accept()
     msg = "\nHi Client[IP address: " + addr[0] + "], \n ֲֳ**Welcome** \n -Server\n"
     conn.send(msg.encode())
     Comm = conn.recv(BUF_SIZE)
-    while Comm:
-        args = Comm.decode().split()
+    args = Comm.decode().split()
+    conndata, daddr = datatran.accept()
+    while len(args) > 0:
+        #print(args)
         while args[0] not in commands or len(args) > 1:
             if args[0] not in commands:
-                msg = "Invalid command: " + args[0] + "\n\nCommands:\n  Upload\n  Retrieve\n  Signin\n  Signout\n  Logging" \
-                                                      "\n  List\n "
+                msg = "Invalid command: " + args[0] + "\n\nCommands:\n  Upload\n  Retrieve\n  Signin\n  Logging\n  List\n "
                 conn.send(msg.encode())
                 Comm = conn.recv(BUF_SIZE)
                 args = Comm.decode().split()
@@ -64,21 +70,18 @@ while True:
                 conn.send(msg.encode())
                 Comm = conn.recv(BUF_SIZE)
                 args = Comm.decode().split()
-
         if args[0] == "Upload":
-            upload(conn)
+            upload(conndata)
         elif args[0] == "Retrieve":
-            retrieve(conn)
-        elif args[0] == "Signin":
-            signin(conn)
-        elif args[0] == "Signout":
-            signout(conn)
+            retrieve(conndata)
         elif args[0] == "Logging":
             logging(conn)
         Comm = conn.recv(BUF_SIZE)
-    conn.close()
+        args = Comm.decode().split()
+    #conn.close()
     print("\n Server closed the connection \n")
 
     # Come out from the infinite while loop as the file has been copied from client.
     break
 s.close()
+datatran.close()
